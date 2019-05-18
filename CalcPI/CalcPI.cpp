@@ -1,4 +1,3 @@
-//#include<fcntl.h>
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include<fstream>
 #include<iostream>
@@ -14,7 +13,6 @@ char buffer[100000];
 cl_uint buf_uint;
 cl_ulong buf_ulong;
 size_t bufsizet;
-cl_long iNumIntervals = 256 * 256;
 
 cl_float* srcC;
 
@@ -23,16 +21,15 @@ size_t programSize;
 char* programBuffer;
 cl_program cpProgram;
 cl_kernel ckKernel;
-
-size_t szGlobalWorkSize;
-size_t szLocalWorkSize;
+//setting local and global sizes
+size_t szLocalWorkSize = 1024;
+size_t szGlobalWorkSize = szLocalWorkSize * szLocalWorkSize;
+//setting intervals to be number of all work items in all work groups
+cl_long iNumIntervals = szGlobalWorkSize;
 
 int main() {
 
-	//set global and local work sizes
-	szLocalWorkSize = 256;
-	szGlobalWorkSize = iNumIntervals;
-
+	cout << "running on " << szLocalWorkSize << " group, and " << szLocalWorkSize << " item" << endl;
 	// Allocate host array
 	srcC = new cl_float[szGlobalWorkSize / szLocalWorkSize];
 
@@ -224,10 +221,11 @@ int main() {
 
 	clFinish(cmdQueue);
 	cout << "answer begin" << endl;
-	for (int i = 1; i < szGlobalWorkSize / szLocalWorkSize; i++) {
-		srcC[0] += srcC[i];
+	float answer = 0.0;
+	for (int i = 0; i < szGlobalWorkSize / szLocalWorkSize; i++) {
+		answer += srcC[i];
 	}
-	cout << srcC[0] << endl;
+	cout << answer << endl;
 
 	delete[] srcC;
 
@@ -242,14 +240,6 @@ int main() {
 	cin.get();
 	return 0;
 }
-
-
-
-
-
-
-
-
 
 
 
